@@ -1,4 +1,5 @@
 use std::fmt::Debug;
+use std::ops::Neg;
 use std::{
     array,
     ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign},
@@ -7,23 +8,48 @@ use std::{
 #[derive(Debug, Clone, Copy)]
 pub struct VecXD<const X: usize, T>
 where
-    T: Add + Sub + Mul + AddAssign + SubAssign + MulAssign + Copy + Default + Debug,
+    T: Add + Sub + Mul<Self> + Mul<T> + AddAssign + SubAssign + MulAssign + Copy + Default + Debug,
 {
     pub v: [T; X],
 }
 
 impl<const X: usize, T> VecXD<X, T>
 where
-    T: Add + Sub + Mul + AddAssign + SubAssign + MulAssign + Copy + Default + Debug,
+    T: Add
+        + Sub
+        + Mul<Self>
+        + Mul<T>
+        + AddAssign
+        + SubAssign
+        + MulAssign
+        + Copy
+        + Default
+        + Debug
+        + Mul,
 {
     pub fn new(data: [T; X]) -> Self {
         Self { v: data }
+    }
+    pub fn len_sq(&self) -> T
+    where
+        Self: Mul<Self, Output = T>,
+    {
+        *self * *self
     }
 }
 
 impl<const X: usize, T> Add for VecXD<X, T>
 where
-    T: Add<Output = T> + Sub + Mul + AddAssign + SubAssign + MulAssign + Copy + Default + Debug,
+    T: Add<Output = T>
+        + Sub
+        + Mul<T>
+        + Mul<Self>
+        + AddAssign
+        + SubAssign
+        + MulAssign
+        + Copy
+        + Default
+        + Debug,
 {
     type Output = Self;
 
@@ -35,7 +61,16 @@ where
 
 impl<const X: usize, T> Sub for VecXD<X, T>
 where
-    T: Add + Sub<Output = T> + Mul + AddAssign + SubAssign + MulAssign + Copy + Default + Debug,
+    T: Add
+        + Sub<Output = T>
+        + Mul<Self>
+        + Mul<T>
+        + AddAssign
+        + SubAssign
+        + MulAssign
+        + Copy
+        + Default
+        + Debug,
 {
     type Output = Self;
 
@@ -47,7 +82,17 @@ where
 
 impl<const X: usize, T> Mul<T> for VecXD<X, T>
 where
-    T: Add + Sub + Mul<Output = T> + AddAssign + SubAssign + MulAssign + Copy + Default + Debug,
+    T: Add
+        + Sub
+        + Mul<Self>
+        + Mul<T>
+        + Mul<Output = T>
+        + AddAssign
+        + SubAssign
+        + MulAssign
+        + Copy
+        + Default
+        + Debug,
 {
     type Output = Self;
 
@@ -59,7 +104,17 @@ where
 
 impl<const X: usize, T> Mul<Self> for VecXD<X, T>
 where
-    T: Add + Sub + Mul<Output = T> + AddAssign + SubAssign + MulAssign + Copy + Default + Debug,
+    T: Add
+        + Sub
+        + Mul<Self>
+        + Mul<T>
+        + Mul<Output = T>
+        + AddAssign
+        + SubAssign
+        + MulAssign
+        + Copy
+        + Default
+        + Debug,
 {
     type Output = T;
 
@@ -76,7 +131,8 @@ where
 
 impl<const X: usize, T> AddAssign for VecXD<X, T>
 where
-    T: Add<Output = T> + Sub + Mul + AddAssign + SubAssign + MulAssign + Copy + Default + Debug,
+    T: Add + Sub + Mul<Self> + Mul<T> + AddAssign + SubAssign + MulAssign + Copy + Default + Debug,
+    Self: Add<Self, Output = Self>,
 {
     fn add_assign(&mut self, rhs: Self) {
         *self = *self + rhs;
@@ -85,7 +141,16 @@ where
 
 impl<const X: usize, T> SubAssign for VecXD<X, T>
 where
-    T: Add + Sub<Output = T> + Mul + AddAssign + SubAssign + MulAssign + Copy + Default + Debug,
+    T: Add
+        + Sub<Output = T>
+        + Mul<Self>
+        + Mul<T>
+        + AddAssign
+        + SubAssign
+        + MulAssign
+        + Copy
+        + Default
+        + Debug,
 {
     fn sub_assign(&mut self, rhs: Self) {
         *self = *self - rhs
@@ -94,9 +159,32 @@ where
 
 impl<const X: usize, T> MulAssign<T> for VecXD<X, T>
 where
-    T: Add + Sub + Mul<Output = T> + AddAssign + SubAssign + MulAssign + Copy + Default + Debug,
+    T: Add + Sub + Mul<Self> + Mul<T> + AddAssign + SubAssign + MulAssign + Copy + Default + Debug,
+    Self: Mul<T, Output = Self>,
 {
     fn mul_assign(&mut self, rhs: T) {
         *self = *self * rhs
+    }
+}
+
+impl<const X: usize, T> Neg for VecXD<X, T>
+where
+    T: Add
+        + Sub
+        + Mul<Self>
+        + Mul<T>
+        + AddAssign
+        + SubAssign
+        + MulAssign
+        + Copy
+        + Default
+        + Debug
+        + Neg<Output = T>,
+{
+    type Output = Self;
+
+    fn neg(self) -> Self::Output {
+        let x = array::from_fn(|i| -self.v[i]);
+        VecXD::new(x)
     }
 }
