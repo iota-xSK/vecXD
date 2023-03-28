@@ -8,7 +8,7 @@ use std::{
 #[derive(Debug, Clone, Copy)]
 pub struct VecXD<const X: usize, T>
 where
-    T: Add + Sub + Mul<Self> + Mul<T> + AddAssign + SubAssign + MulAssign + Copy + Default + Debug,
+    T: Add + Sub + Mul<T> + AddAssign + SubAssign + MulAssign + Copy + Default + Debug,
 {
     pub v: [T; X],
 }
@@ -17,8 +17,7 @@ impl<const X: usize, T> VecXD<X, T>
 where
     T: Add
         + Sub
-        + Mul<Self>
-        + Mul<T>
+        + Mul<T, Output = T>
         + AddAssign
         + SubAssign
         + MulAssign
@@ -38,12 +37,11 @@ where
     }
 }
 
-impl<const X: usize, T> Add for VecXD<X, T>
+impl<const X: usize, T> Add<Self> for VecXD<X, T>
 where
-    T: Add<Output = T>
+    T: Add<T, Output = T>
         + Sub
-        + Mul<T>
-        + Mul<Self>
+        + Mul<T, Output = T>
         + AddAssign
         + SubAssign
         + MulAssign
@@ -62,9 +60,8 @@ where
 impl<const X: usize, T> Sub for VecXD<X, T>
 where
     T: Add
-        + Sub<Output = T>
-        + Mul<Self>
-        + Mul<T>
+        + Sub<T, Output = T>
+        + Mul<T, Output = T>
         + AddAssign
         + SubAssign
         + MulAssign
@@ -82,17 +79,7 @@ where
 
 impl<const X: usize, T> Mul<T> for VecXD<X, T>
 where
-    T: Add
-        + Sub
-        + Mul<Self>
-        + Mul<T>
-        + Mul<Output = T>
-        + AddAssign
-        + SubAssign
-        + MulAssign
-        + Copy
-        + Default
-        + Debug,
+    T: Add + Sub + Mul<T, Output = T> + AddAssign + SubAssign + MulAssign + Copy + Default + Debug,
 {
     type Output = Self;
 
@@ -104,17 +91,7 @@ where
 
 impl<const X: usize, T> Mul<Self> for VecXD<X, T>
 where
-    T: Add
-        + Sub
-        + Mul<Self>
-        + Mul<T>
-        + Mul<Output = T>
-        + AddAssign
-        + SubAssign
-        + MulAssign
-        + Copy
-        + Default
-        + Debug,
+    T: Add + Sub + Mul<T, Output = T> + AddAssign + SubAssign + MulAssign + Copy + Default + Debug,
 {
     type Output = T;
 
@@ -131,7 +108,7 @@ where
 
 impl<const X: usize, T> AddAssign for VecXD<X, T>
 where
-    T: Add + Sub + Mul<Self> + Mul<T> + AddAssign + SubAssign + MulAssign + Copy + Default + Debug,
+    T: Add + Sub + Mul<T, Output = T> + AddAssign + SubAssign + MulAssign + Copy + Default + Debug,
     Self: Add<Self, Output = Self>,
 {
     fn add_assign(&mut self, rhs: Self) {
@@ -143,14 +120,14 @@ impl<const X: usize, T> SubAssign for VecXD<X, T>
 where
     T: Add
         + Sub<Output = T>
-        + Mul<Self>
-        + Mul<T>
+        + Mul<T, Output = T>
         + AddAssign
         + SubAssign
         + MulAssign
         + Copy
         + Default
         + Debug,
+    Self: Sub<Self, Output = Self>,
 {
     fn sub_assign(&mut self, rhs: Self) {
         *self = *self - rhs
@@ -159,7 +136,7 @@ where
 
 impl<const X: usize, T> MulAssign<T> for VecXD<X, T>
 where
-    T: Add + Sub + Mul<Self> + Mul<T> + AddAssign + SubAssign + MulAssign + Copy + Default + Debug,
+    T: Add + Sub + Mul<T, Output = T> + AddAssign + SubAssign + MulAssign + Copy + Default + Debug,
     Self: Mul<T, Output = Self>,
 {
     fn mul_assign(&mut self, rhs: T) {
@@ -171,8 +148,7 @@ impl<const X: usize, T> Neg for VecXD<X, T>
 where
     T: Add
         + Sub
-        + Mul<Self>
-        + Mul<T>
+        + Mul<T, Output = T>
         + AddAssign
         + SubAssign
         + MulAssign
