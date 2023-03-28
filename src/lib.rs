@@ -16,7 +16,7 @@ impl<const X: usize, T> VecXD<X, T>
 where
     T: Add + Sub + Mul + AddAssign + SubAssign + MulAssign + Copy + Default + Debug,
 {
-    fn new(data: [T; X]) -> Self {
+    pub fn new(data: [T; X]) -> Self {
         Self { v: data }
     }
 }
